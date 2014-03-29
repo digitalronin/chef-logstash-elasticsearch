@@ -1,14 +1,13 @@
-execute "add-logstash-repo-key" do
-  command "wget -O - http://packages.elasticsearch.org/GPG-KEY-elasticsearch | apt-key add -"
-  not_if "apt-key list | grep Elasticsearch"
+package "java7-runtime-headless"
+
+path = "#{Chef::Config[:file_cache_path]}/logstash-1.4.0.tar.gz"
+remote_file path do
+  source "https://download.elasticsearch.org/logstash/logstash/logstash-1.4.0.tar.gz"
+  action :create_if_missing
+  not_if "ls /opt/logstash"
 end
 
-execute "add-logstash-repo" do
-  command "echo 'deb http://packages.elasticsearch.org/logstash/1.4/debian stable main' >> /etc/apt/sources.list"
-  not_if "grep packages.elasticsearch.org.logstash /etc/apt/sources.list"
+execute "untar" do
+  command "tar xzvf #{path} --directory /opt"
+  not_if "ls /opt/logstash"
 end
-
-execute "apt-get update"
-
-package "logstash"
-
